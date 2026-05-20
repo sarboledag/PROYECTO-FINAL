@@ -1,0 +1,601 @@
+%% ============================================================
+%%  Informe Proyecto Final — IA · EAFIT 2026-1
+%%  Sistema de Predicción de Abandono Estudiantil
+%%  Compilar con pdfLaTeX en Overleaf
+%% ============================================================
+
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=1.8cm, top=2.2cm, bottom=2.2cm]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{palatino}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage[dvipsnames,svgnames]{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+%% -- Paleta EAFIT -------------------------------------------
+\definecolor{eafitblue}{RGB}{0, 61, 121}
+\definecolor{eafitgreen}{RGB}{0, 150, 80}
+\definecolor{eafitgray}{RGB}{90, 90, 90}
+\definecolor{codebg}{RGB}{248, 248, 252}
+\definecolor{codecomment}{RGB}{100, 110, 130}
+\definecolor{codekw}{RGB}{0, 90, 170}
+\definecolor{codestr}{RGB}{160, 50, 0}
+
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codekw}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestr},
+  numbers=left, numberstyle=\tiny\color{eafitgray},
+  numbersep=6pt, frame=single, framesep=3pt,
+  rulecolor=\color{eafitblue!30},
+  breaklines=true, captionpos=b, language=Python,
+  showstringspaces=false, tabsize=4,
+}
+
+\titleformat{\section}
+  {\normalfont\bfseries\large\color{eafitblue}}
+  {\thesection.}{0.6em}{}
+  [\vspace{-2pt}\color{eafitblue!35}\hrule\vspace{4pt}]
+
+\titleformat{\subsection}
+  {\normalfont\bfseries\normalsize\color{eafitblue!80}}
+  {\thesubsection.}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{eafitgray}\textit{Proyecto Final . Inteligencia Artificial . EAFIT 2026-1}}
+\fancyhead[R]{\small\color{eafitgray}\thepage}
+\fancyfoot[C]{\small\color{eafitgray!60}Desarrollado por Profesores de Inteligencia Artificial EAFIT 2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{%
+  \hbox to\headwidth{\color{eafitblue!35}\leaders\hrule height \headrulewidth\hfill}}
+
+\hypersetup{
+  colorlinks=true, linkcolor=eafitblue,
+  citecolor=eafitgreen, urlcolor=eafitblue!80,
+  pdftitle={Sistema de Prediccion de Abandono Estudiantil — EAFIT 2026},
+  pdfauthor={Equipo — EAFIT},
+}
+
+\captionsetup{font=small, labelfont={bf,color=eafitblue}, skip=4pt}
+
+\newcommand{\nota}[1]{%
+  \vspace{4pt}
+  \noindent\colorbox{eafitblue!8}{%
+    \begin{minipage}{\columnwidth-2\fboxsep}
+      \small\color{eafitblue!80}\textbf{Nota:} #1
+    \end{minipage}
+  }
+  \vspace{4pt}
+}
+
+% ============================================================
+\begin{document}
+
+%% ==========================================================
+%%  PORTADA
+%% ==========================================================
+\twocolumn[{%
+\begin{center}
+  {\color{eafitblue!25}\rule{\linewidth}{3pt}}\\[6pt]
+
+  {\Large\bfseries\color{eafitblue}
+    Sistema de Predicción de Abandono Estudiantil\\[4pt]
+    mediante Machine Learning y Recomendaciones Personalizadas\\[4pt]
+  }
+
+  {\normalsize\color{eafitgray}
+    Clasificación binaria con Random Forest y generación de recomendaciones
+    para intervención temprana\\[10pt]
+  }
+
+  \begin{tabular}{cc}
+    \textbf{Santiago Arboleda} & \textbf{Juan Esteban Villada} \\
+    \small\texttt{sarboledag@eafit.edu.co} & \small\texttt{Jevilladao@eafit.edu.co}\\[6pt]
+    \multicolumn{2}{c}{\textbf{Cristian Cabezas}} \\
+    \multicolumn{2}{c}{\small\texttt{cdcabezasj@eafit.edu.co}}
+  \end{tabular}\\[10pt]
+
+  {\small\color{eafitgray}
+    Escuela de Ciencias Aplicadas e Ingeniería . Universidad EAFIT\\
+    Curso: Inteligencia Artificial . Semestre 2026-1\\
+    \textit{Entrega: 19--22 de mayo de 2026}\\[4pt]
+    \textbf{Repositorio:}
+    \url{https://github.com/sarboledag/PROYECTO-FINAL}
+  }\\[6pt]
+  {\color{eafitblue!25}\rule{\linewidth}{1pt}}\\[10pt]
+\end{center}
+}]
+
+%% ==========================================================
+%%  ABSTRACT
+%% ==========================================================
+\begin{abstract}
+\noindent
+El abandono estudiantil representa un problema relevante para las
+instituciones de educación superior, ya que afecta la permanencia académica,
+la eficiencia institucional y el acompañamiento oportuno de los estudiantes.
+Este proyecto desarrolla un sistema de Inteligencia Artificial para predecir
+el riesgo de abandono estudiantil a partir de variables académicas, económicas
+y personales.
+
+Se utilizó el dataset \textit{Predict Students' Dropout and Academic Success},
+transformando la variable objetivo original en una tarea de clasificación
+binaria: abandono y no abandono. Se realizó un análisis exploratorio de datos,
+preprocesamiento, entrenamiento de modelos y evaluación con métricas de
+clasificación. Se compararon tres enfoques: un baseline basado en la clase
+mayoritaria, una Regresión Logística y un Random Forest.
+
+El modelo Random Forest fue seleccionado como modelo principal, alcanzando
+un Accuracy de 0.8847, un Recall de 0.7394, un F1-score de 0.8046 y un
+AUC-ROC de 0.9316. Además, se implementó una aplicación en Streamlit que
+permite seleccionar un estudiante, estimar su probabilidad de abandono y
+generar una recomendación personalizada para intervención temprana.\\[4pt]
+
+\textbf{Palabras clave:} abandono estudiantil, Machine Learning,
+Random Forest, clasificación binaria, Streamlit, recomendación personalizada.
+\end{abstract}
+
+\vspace{4pt}
+
+%% ==========================================================
+%%  1. INTRODUCCIÓN
+%% ==========================================================
+\section{Introducción}
+
+El abandono estudiantil es un fenómeno que afecta a muchas instituciones
+de educación superior. Cuando un estudiante abandona su proceso académico,
+no solo se ve afectado su proyecto personal y profesional, sino también
+la capacidad de la institución para acompañar, retener y graduar a sus
+estudiantes. Por esta razón, resulta importante desarrollar herramientas
+que permitan identificar señales tempranas de riesgo y apoyar procesos
+de intervención~\cite{martins2021}.
+
+En este proyecto se propone un sistema de Inteligencia Artificial para
+predecir el riesgo de abandono estudiantil a partir de información
+académica, económica y personal. El problema se aborda como una tarea de
+clasificación binaria, donde el modelo debe determinar si un estudiante
+pertenece a la clase \textit{Abandona} o \textit{No abandona}.
+
+La \textbf{pregunta de investigación} planteada es:
+\begin{quote}
+  \textit{``¿Puede un modelo de Machine Learning predecir el riesgo de
+  abandono estudiantil con un F1-score superior al baseline y generar
+  recomendaciones personalizadas que apoyen procesos de intervención
+  temprana?''}
+\end{quote}
+
+Para responder esta pregunta se utilizó el dataset \textit{Predict
+Students' Dropout and Academic Success}~\cite{dataset2022}. Se realizó
+un análisis exploratorio, entrenamiento de modelos de clasificación,
+comparación de métricas y desarrollo de una aplicación en Streamlit.
+El documento se organiza así: la Sección~2 describe los datos y el EDA,
+la Sección~3 presenta la arquitectura, la Sección~4 detalla la metodología,
+la Sección~5 reporta resultados y la Sección~6 discute hallazgos.
+
+%% ==========================================================
+%%  2. DATOS Y EDA
+%% ==========================================================
+\section{Datos y Exploración (EDA)}
+
+\subsection{Descripción del dataset}
+
+El dataset utilizado fue \textit{Predict Students' Dropout and Academic
+Success}, el cual contiene información de estudiantes de educación superior
+en Portugal. La variable objetivo original incluye tres clases:
+\textit{Graduate}, \textit{Dropout} y \textit{Enrolled}. Para este proyecto
+se transformó en una variable binaria \texttt{Dropout\_Binary}, donde 1
+representa estudiantes que abandonaron y 0 representa graduados o aún
+matriculados.
+
+\begin{table}[H]
+\centering
+\caption{Resumen del dataset utilizado}
+\label{tab:dataset}
+\begin{tabularx}{\columnwidth}{lX}
+\toprule
+\textbf{Atributo} & \textbf{Descripción} \\
+\midrule
+Fuente & UCI Machine Learning Repository \\
+Registros (N) & 4\,424 estudiantes \\
+Features (p) & 36 variables académicas, económicas y personales \\
+Variable objetivo & \texttt{Dropout\_Binary}: 0 = No abandona, 1 = Abandona \\
+Distribución & 67.88\% No abandona / 32.12\% Abandona \\
+Valores nulos & Ninguno \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Después de la transformación, se obtuvo una distribución de 3\,003
+estudiantes en la clase \textit{No abandona} y 1\,421 en la clase
+\textit{Abandona}.
+
+\subsection{Hallazgos del análisis exploratorio}
+
+El análisis exploratorio mostró que las variables académicas son las más
+relacionadas con el abandono estudiantil. Las variables asociadas al número
+de unidades curriculares aprobadas y a las calificaciones promedio del
+primero y segundo semestre presentaron diferencias importantes entre ambas
+clases.
+
+\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=1pt]
+  \item \textbf{Variables académicas:} el promedio de unidades aprobadas
+        en el 2.º semestre fue 5.61 para quienes no abandonan y 1.94
+        para quienes abandonan. La nota promedio del 2.º semestre fue
+        12.27 vs. 5.89, respectivamente.
+  \item \textbf{Variables económicas:} los estudiantes con matrícula al
+        día y sin deudas presentaron menor probabilidad de abandono.
+  \item \textbf{Edad de ingreso:} estudiantes que ingresan con mayor
+        edad mostraron mayor riesgo, posiblemente por responsabilidades
+        laborales o familiares.
+  \item \textbf{Sin valores nulos:} no se requirió ninguna estrategia
+        de imputación.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  %% Exportar desde el notebook con:
+  %% plt.savefig("fig_eda.png", dpi=200, bbox_inches='tight')
+  %% y subir a Overleaf con el botón Upload
+  \fbox{\rule{0pt}{2.8cm}\rule{\columnwidth-2\fboxsep}{0pt}}
+  \caption{Distribución de la variable objetivo y variables más
+           correlacionadas con el abandono estudiantil.}
+  \label{fig:eda}
+\end{figure}
+
+%% ==========================================================
+%%  3. ARQUITECTURA DEL SISTEMA
+%% ==========================================================
+\section{Arquitectura del Sistema}
+
+El sistema está compuesto por tres capas que operan en secuencia:
+(1)~pipeline de ML para predicción del riesgo de abandono,
+(2)~módulo de recomendación personalizada con estructura de prompt LLM, y
+(3)~aplicación web Streamlit para interacción del usuario final
+(orientadores y coordinadores académicos).
+
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{3.2cm}\rule{\columnwidth-2\fboxsep}{0pt}}
+  \caption{Arquitectura general del sistema. El dataset alimenta el
+           pipeline ML; la predicción activa el módulo de recomendación;
+           la app Streamlit expone el sistema al usuario.}
+  \label{fig:arq}
+\end{figure}
+
+\subsection{Componentes principales}
+
+\paragraph{Preprocesamiento.}
+Se creó la variable \texttt{Dropout\_Binary} a partir de la variable
+original multiclase. El dataset no requirió imputación de valores nulos.
+División: 80\% entrenamiento / 20\% prueba con \texttt{random\_state=42}.
+
+\paragraph{Modelo de ML.}
+Se evaluaron tres modelos: Baseline (clase mayoritaria), Regresión
+Logística (con \texttt{StandardScaler} y \texttt{max\_iter=1000}) y
+Random Forest (300 árboles, \texttt{class\_weight=balanced},
+\texttt{random\_state=42}). Random Forest fue seleccionado como modelo
+principal por su mayor AUC-ROC (0.9316) y su capacidad de manejar el
+desbalance de clases.
+
+\paragraph{Componente LLM.}
+El módulo de recomendación extrae las variables clave del estudiante
+(notas, materias aprobadas, estado financiero, edad de ingreso) y genera
+una recomendación de intervención personalizada en lenguaje natural,
+clasificando el riesgo en tres niveles: Alto ($\geq 70\%$), Medio
+($\geq 40\%$) y Bajo ($< 40\%$). El prompt está estructurado para ser
+compatible con LLMs externos (Groq, OpenAI) como extensión futura.
+
+\paragraph{Aplicación Web (Streamlit).}
+La interfaz \texttt{app.py} permite al usuario seleccionar un estudiante
+por índice, visualizar sus datos, ejecutar la predicción en tiempo real
+y obtener la recomendación de intervención. Consume los modelos
+serializados con \texttt{joblib}.
+
+%% ==========================================================
+%%  4. METODOLOGÍA
+%% ==========================================================
+\section{Metodología}
+
+\subsection{Configuración experimental}
+
+\begin{table}[H]
+\centering
+\caption{Configuración de los modelos entrenados}
+\label{tab:hparams}
+\begin{tabularx}{\columnwidth}{lX}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} \\
+\midrule
+Framework & scikit-learn \\
+División datos & 80\% train / 20\% test \\
+Baseline & DummyClassifier (clase mayoritaria) \\
+Regresión Logística & StandardScaler + LR, max\_iter=1000 \\
+Random Forest & 300 árboles, class\_weight=balanced \\
+Métrica principal & AUC-ROC \\
+Hardware & Google Colab (CPU) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Estrategia de validación}
+
+Se utilizó \textbf{hold-out} fijo (80/20) dado que el dataset cuenta con
+más de 4\,000 registros y la proporción de la clase positiva (32.12\%) es
+suficiente para obtener representación en el conjunto de prueba. El uso de
+\texttt{class\_weight=balanced} en Random Forest compensa el desbalance
+sin necesidad de oversampling explícito.
+
+\subsection{Experimentos realizados}
+
+\begin{enumerate}[leftmargin=*,topsep=2pt,itemsep=2pt]
+  \item \textbf{Baseline:} DummyClassifier que predice siempre la clase
+        mayoritaria. AUC-ROC = 0.500, F1 = 0.000.
+  \item \textbf{Experimento 1 — Regresión Logística:} modelo lineal con
+        normalización. AUC-ROC = 0.9266, F1 = 0.8054, Accuracy = 0.8859.
+  \item \textbf{Experimento 2 — Random Forest (mejor):} ensamble de 300
+        árboles con pesos balanceados. AUC-ROC = 0.9316, F1 = 0.8046,
+        Accuracy = 0.8847.
+\end{enumerate}
+
+%% ==========================================================
+%%  5. RESULTADOS
+%% ==========================================================
+\section{Resultados}
+
+\subsection{Métricas de evaluación}
+
+\begin{table}[H]
+\centering
+\caption{Comparación de modelos en el test set (N\,=\,885)}
+\label{tab:resultados}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modelo} & \textbf{Acc.} & \textbf{F1} & \textbf{AUC} & \textbf{Recall} \\
+\midrule
+Baseline         & 0.679 & 0.000 & 0.500 & 0.000 \\
+Reg. Logística   & 0.886 & 0.805 & 0.927 & 0.736 \\
+\textbf{Rand. Forest} & \textbf{0.885} & \textbf{0.805} & \textbf{0.932} & \textbf{0.739} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El modelo Random Forest supera al baseline en 43.2 puntos de AUC-ROC y
+logra un F1 de 0.805 sobre la clase positiva (abandono). La Regresión
+Logística obtiene resultados similares (AUC\,=\,0.927), lo que indica
+que las variables del dataset tienen alta separabilidad lineal.
+La Tabla~\ref{tab:resultados} confirma que el sistema supera ampliamente
+el baseline propuesto.
+
+\subsection{Análisis de resultados}
+
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{2.8cm}\rule{\columnwidth-2\fboxsep}{0pt}}
+  \caption{Matriz de confusión del Random Forest. 210 verdaderos positivos
+           (abandonos detectados) y 74 falsos negativos.}
+  \label{fig:cm}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{2.5cm}\rule{\columnwidth-2\fboxsep}{0pt}}
+  \caption{Curva ROC de los tres modelos. Random Forest alcanza
+           AUC\,=\,0.932.}
+  \label{fig:roc}
+\end{figure}
+
+Las variables con mayor importancia en el Random Forest fueron:
+unidades curriculares aprobadas en el 2.º semestre, nota promedio del
+2.º semestre, unidades aprobadas en el 1.º semestre, nota promedio del
+1.º semestre y estado de pago de matrícula. Estas cinco variables
+explican más del 60\% de la importancia total del modelo.
+
+\subsection{Sistema de recomendación}
+
+El módulo de recomendación clasifica el riesgo y genera orientaciones
+accionables para cada estudiante:
+
+\begin{lstlisting}[caption={Ejemplo de output del sistema para un
+estudiante de alto riesgo}]
+Nivel de riesgo: Alto
+Probabilidad de abandono: 87.0%
+
+Recomendaciones:
+- Asignar tutorias academicas de refuerzo
+- Remitir a bienestar universitario
+  o apoyo financiero
+- Programar revision periodica del caso
+\end{lstlisting}
+
+%% ==========================================================
+%%  6. DISCUSIÓN
+%% ==========================================================
+\section{Discusión}
+
+\subsection{Interpretación de resultados}
+
+El sistema logró el objetivo planteado: Random Forest alcanza
+AUC-ROC\,=\,0.932, superando el baseline (0.500) en 43 puntos y
+respondiendo afirmativamente la pregunta de investigación. La diferencia
+marginal con Regresión Logística (0.927) sugiere que el problema tiene
+una estructura predominantemente lineal, resultado consistente con la
+literatura sobre predicción de abandono~\cite{martins2021}. El módulo
+de recomendación cumple su función de traducir la predicción a lenguaje
+comprensible para orientadores y coordinadores académicos.
+
+\subsection{Limitaciones}
+
+\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=1pt]
+  \item \textbf{LLM simulado:} el componente de recomendación usa reglas
+        \texttt{if/else} con estructura de prompt, no un LLM real
+        conectado a una API externa. Esto limita la riqueza y
+        adaptabilidad de las respuestas.
+  \item \textbf{Dominio específico:} el modelo fue entrenado con datos
+        de universidades portuguesas; su generalización a contextos
+        colombianos requiere re-entrenamiento con datos locales.
+  \item \textbf{Sin RAG:} no se implementó recuperación sobre reglamentos
+        institucionales, lo que enriquecería las recomendaciones con
+        políticas específicas de la universidad.
+  \item \textbf{74 falsos negativos:} estudiantes en riesgo que el modelo
+        no detecta representan el principal punto de mejora del sistema.
+\end{itemize}
+
+\subsection{Trabajo futuro}
+
+Dos extensiones concretas de alto impacto serían: (1)~conectar el
+módulo de recomendación a un \textbf{LLM real} vía Groq o OpenAI para
+generar orientaciones más ricas y contextualizadas; y (2)~implementar
+un módulo \textbf{RAG} que indexe los reglamentos académicos de EAFIT
+en ChromaDB, permitiendo que las recomendaciones citen artículos
+específicos del reglamento estudiantil.
+
+%% ==========================================================
+%%  7. CONCLUSIONES
+%% ==========================================================
+\section{Conclusiones}
+
+Este proyecto construyó un sistema funcional de predicción de abandono
+estudiantil que combina Machine Learning con un módulo de recomendación
+en lenguaje natural y una aplicación web desplegable. El modelo Random
+Forest alcanzó AUC-ROC\,=\,0.9316 y F1\,=\,0.8046, superando ampliamente
+al baseline (AUC\,=\,0.500) y respondiendo afirmativamente la pregunta
+de investigación planteada. La aplicación Streamlit permite a orientadores
+seleccionar estudiantes y obtener predicciones de riesgo con
+recomendaciones de intervención en tiempo real. El principal trabajo futuro
+es reemplazar el módulo de recomendación basado en reglas por un LLM real
+y añadir RAG sobre reglamentos institucionales para enriquecer las
+orientaciones generadas.
+
+%% ==========================================================
+%%  CONTRIBUCIONES
+%% ==========================================================
+\section*{Contribuciones del equipo}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{5.2cm}}
+\toprule
+\textbf{Integrante} & \textbf{Contribución principal} \\
+\midrule
+Santiago Arboleda & EDA, preprocesamiento, visualizaciones \\
+Juan Esteban Villada & Modelos ML, evaluación, métricas \\
+Cristian Cabezas & Módulo LLM, app Streamlit, integración \\
+\bottomrule
+\end{tabular}
+\caption*{Distribución de responsabilidades por integrante.}
+\end{table}
+
+%% ==========================================================
+%%  REPOSITORIO Y DEMO
+%% ==========================================================
+\section*{Repositorio y Demo}
+
+\begin{itemize}[leftmargin=*,topsep=2pt,itemsep=1pt]
+  \item \textbf{GitHub:} \url{https://github.com/sarboledag/PROYECTO-FINAL}
+  \item \textbf{Video demo ($\leq$3 min):} \url{https://youtu.be/link-al-video}
+  \item \textbf{Instalación:} \texttt{pip install -r requirements.txt}
+  \item \textbf{App:} \texttt{streamlit run app.py}
+  \item \textbf{Notebook:} \texttt{notebooks/Proyecto\_Final\_IA\_Abandono\_Estudiantil.ipynb}
+\end{itemize}
+
+%% ==========================================================
+%%  REFERENCIAS
+%% ==========================================================
+\begin{thebibliography}{99}
+
+\bibitem{dataset2022}
+Realinho, V., Vieira Martins, M., Machado, J., \& Baptista, L. (2022).
+\textit{Predict Students' Dropout and Academic Success}.
+UCI Machine Learning Repository.
+\url{https://doi.org/10.24432/C5MC89}
+
+\bibitem{martins2021}
+Martins, M. V., Tolledo, D., Machado, J., Baptista, L. M., \& Realinho, V. (2021).
+\textit{Early prediction of student's performance in higher education:
+A case study}.
+Trends and Applications in Information Systems and Technologies, 166--175.
+
+\bibitem{breiman2001}
+Breiman, L. (2001).
+\textit{Random Forests}.
+Machine Learning, 45(1), 5--32.
+\url{https://doi.org/10.1023/A:1010933404324}
+
+\bibitem{sklearn2011}
+Pedregosa, F., et al. (2011).
+\textit{Scikit-learn: Machine Learning in Python}.
+Journal of Machine Learning Research, 12, 2825--2830.
+
+\bibitem{streamlit2019}
+Streamlit Inc. (2019).
+\textit{Streamlit: The fastest way to build data apps}.
+\url{https://streamlit.io}
+
+\end{thebibliography}
+
+%% ==========================================================
+%%  APÉNDICE
+%% ==========================================================
+\appendix
+
+\section{Variables más importantes del modelo}
+
+Las 5 variables con mayor importancia según el Random Forest fueron:
+(1)~unidades curriculares aprobadas en el 2.º semestre,
+(2)~nota promedio del 2.º semestre,
+(3)~unidades curriculares aprobadas en el 1.º semestre,
+(4)~nota promedio del 1.º semestre, y
+(5)~estado de pago de matrícula al día.
+Estas variables explican más del 60\% de la importancia total del modelo.
+
+\section{Estructura del repositorio}
+
+\begin{lstlisting}[language=bash,
+  caption={Árbol de archivos del proyecto}]
+proyecto_final_ia/
+|-- app.py
+|-- README.md
+|-- requirements.txt
+|-- data/
+|   |-- student_dropout_procesado.csv
+|-- models/
+|   |-- modelo_random_forest.pkl
+|   |-- columnas_modelo.pkl
+|-- notebooks/
+|   |-- Proyecto_Final_IA_Abandono.ipynb
+|-- docs/
+|   |-- informe_final.tex
+|-- video/
+    |-- video_demo.webm
+\end{lstlisting}
+
+\end{document}
+%% ============================================================
+%%  FIN — Universidad EAFIT · IA 2026-1
+%% ============================================================
